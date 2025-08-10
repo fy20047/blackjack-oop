@@ -10,11 +10,10 @@
 - 莊家規則：17 停（含 soft 17）
 - 支援下注、Blackjack 3:2 賠率、平局 Push
 - 介面清楚，內含錯誤輸入防護
+- 新增：回合數紀錄、剩餘卡牌數顯示、再來一局預設 Enter=Y
 
 執行：
     python blackjack.py
-
-作者提示：若要做成課堂小專案，可把此檔命名為 blackjack.py，並附上 README 與流程圖即可。
 """
 from __future__ import annotations
 import random
@@ -108,9 +107,13 @@ class Game:
         self.player = Player(player_name)
         self.dealer = Player("Dealer", chips=0)
         self.bet = 0
+        self.round_no = 0  # <<< 新增：回合數
 
     # === 單局流程 ===
     def play_round(self) -> None:
+        # 開始新回合時立即遞增
+        self.round_no += 1
+        
         self.player.reset_hand()
         self.dealer.reset_hand()
         self.bet = self._ask_bet()
@@ -156,6 +159,10 @@ class Game:
         if header:
             print(header)
             print("=" * 40)
+        print(f"回合：{self.round_no}    剩餘卡牌數：{len(self.deck.cards)}")
+        if remaining_cards < 15:  # <<< 洗牌門檻
+            print("⚠️  剩餘卡牌不足，下回合將自動洗牌！")
+        print("-" * 40)
         print(f"莊家: {render_hand(self.dealer.hand, hide_first=not reveal_dealer)}  (點數: {'?' if not reveal_dealer else self.dealer.value})")
         print(f"你  : {render_hand(self.player.hand)}  (點數: {self.player.value})")
         print("-" * 40)
@@ -236,7 +243,9 @@ def main() -> None:
         game.play_round()
         clear_screen()
         print(f"目前籌碼：{game.player.chips}")
-        again = input("再來一局嗎？(Y/N)：").strip().upper()
+        # 預設 Enter=Y；輸入 N/其他才離開
+        again_raw = input("再來一局嗎？(Enter=Y / N=結束)：").strip().upper()
+        again = "Y" if again_raw == "" else again_raw
         if again != "Y":
             break
 

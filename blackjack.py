@@ -159,6 +159,8 @@ class Game:
         if header:
             print(header)
             print("=" * 40)
+        # 先計算剩餘卡牌數
+        remaining_cards = len(self.deck.cards)
         print(f"回合：{self.round_no}    剩餘卡牌數：{len(self.deck.cards)}")
         if remaining_cards < 15:  # <<< 洗牌門檻
             print("⚠️  剩餘卡牌不足，下回合將自動洗牌！")
